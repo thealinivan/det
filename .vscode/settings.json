@@ -1,0 +1,5 @@
+{
+    "zenMode.hideStatusBar": true,
+    "zenMode.restore": false,
+    "python.defaultInterpreterPath": "/usr/local/bin/python3",
+}
