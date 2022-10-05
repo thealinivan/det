@@ -15,4 +15,4 @@ def readFromParquetFile(data_source, spark_session):
 # Write
 def writeToParquetFile(data, file_location):
     data.write.mode(parquet_write_mode).parquet(file_location)
-    data.show()                                                                                      # log: appended data (first 20 rows) 
+    data.show()                                                  # log: appended data (first 20 rows) 

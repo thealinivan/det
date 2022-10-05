@@ -51,6 +51,6 @@ def main():
         df = readFromCSVFile(provider[0], getSchema(), spark)
         cleaned_data = processDataFrame(df, provider[1])
         writeToParquetFile(cleaned_data, getParquetFile())    
-    readFromParquetFile(getParquetFile(), spark).sort(title).show()                                            # log: cross validation of Parquet data                                                                      
+    readFromParquetFile(getParquetFile(), spark).sort(title).show()                                     # log: cross validation of Parquet data                                                                      
 
 main()

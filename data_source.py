@@ -1,20 +1,21 @@
 # Data source
-NETFLIX_CSV_FILE_LOCATION = "data/netflix_titles.csv"
-STREAMING_SERVICE_NETFLIX = "Netflix"
+NETFLIX_04_10_2022 = "data/netflix_titles.csv"
+AMAZON_05_10_2022 = "data/amazon_prime_titles.csv"
+DISNEY_05_10_2022 = "data/disney_plus_titles.csv"
 
-AMAZON_CSV_FILE_LOCATION = "data/amazon_prime_titles.csv"
-STREAMING_SERVICE_AMAZON = "Amazon"
+# Streaming service provider name
+AMAZON = "Amazon"
+DISNEY = "Disney"
+NETFLIX = "Netflix"
 
-DISNEY_CSV_FILE_LOCATION = "data/disney_plus_titles.csv"
-STREAMING_SERVICE_DISNEY = "Disney"
-
+# Output file
 PARQUET_FILE = "data/cleaned_films.parquet"
 
 def getDataSources():
     return [\
-        [NETFLIX_CSV_FILE_LOCATION, STREAMING_SERVICE_NETFLIX],\
-        [AMAZON_CSV_FILE_LOCATION, STREAMING_SERVICE_AMAZON],\
-        [DISNEY_CSV_FILE_LOCATION, STREAMING_SERVICE_DISNEY]\
+        [NETFLIX_04_10_2022, NETFLIX],\
+        [AMAZON_05_10_2022, AMAZON],\
+        [DISNEY_05_10_2022, DISNEY]\
     ]
 
 def getParquetFile():
