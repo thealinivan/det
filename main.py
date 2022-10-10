@@ -3,6 +3,7 @@ from data_source import getDataSources, getParquetFile
 from spark_session import getSparkSession
 from schema import getSchema, id, type, title, director, cast, country, date_added, release_year, rating, duration, streaming_service
 from file_manipulation import readFromCSVFile, readFromParquetFile, writeToParquetFile
+from validation import create_expectations, validate_data
 
 # Filters and Processing information
 types_movie = "Movie"
@@ -32,8 +33,7 @@ def processDataFrame(df, streaming_service_name):
     df = df.withColumn(adult, when(col(rating).contains(rating_tv_ma) | 
                 col(rating).contains(rating_r), True).otherwise(False))                              # based on 2 different types of rating
     df = df.withColumn(american, when(col(country).contains(countries_us), True).otherwise(False))   # including US as country
-    df = df.withColumn(american, when(col(country) == countries_us, True).otherwise(False))          # only US as country
-    df.printSchema()                                                                                 # log schema structure
+    df = df.withColumn(american, when(col(country) == countries_us, True).otherwise(False))          # only US as country                                                                               
     cleaned_films = df.select(
         title, 
         director,
@@ -48,9 +48,25 @@ def processDataFrame(df, streaming_service_name):
 
 def main():
     for provider in getDataSources():
+        print("Processing "+provider[1]+"..")
+        # Data validation using expectations
+        films_expec_path = "expectations/"+provider[1]+"_expectations.json"
+        create_expectations(provider[0], films_expec_path)
+        validate_data(provider[0], films_expec_path)
+
+        # Clean and extract and save required data
         df = readFromCSVFile(provider[0], getSchema(), spark)
+        print("Displaying "+provider[1]+" schema..")
+        df.printSchema() 
+        print("Printing "+provider[1]+" raw data..")
+        df.show()
         cleaned_data = processDataFrame(df, provider[1])
-        writeToParquetFile(cleaned_data, getParquetFile())    
-    readFromParquetFile(getParquetFile(), spark).sort(title).show()                                            # log: cross validation of Parquet data                                                                      
+        writeToParquetFile(cleaned_data, getParquetFile())
+        print("Displaying "+provider[1]+" cleaned data..")
+        cleaned_data.show()
+    
+    # Display the output data   
+    print("Displaying agregated data across "+str([x[1] for x in getDataSources()]))   
+    readFromParquetFile(getParquetFile(), spark).sort(title).show()                                     # log: cross validation of Parquet data                                                                      
 
 main()
