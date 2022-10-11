@@ -1,9 +1,13 @@
 from platform import release
 import great_expectations as ge
-from schema import getSchema, id, type, title, director, cast, country, date_added, release_year, rating, duration, streaming_service
+from schema import id, type, title, director, cast, country, date_added, release_year, rating, duration, streaming_service
 
 
 # Create expectations
+# Args:
+    # string: csv_data_source (the relative file path for the CSV data source)
+    # string: expec_file_path (the relative file path to save the expectations suite)
+# Return: None
 def create_expectations(csv_data_source, expec_file_path):
     train = ge.read_csv(csv_data_source)
     
@@ -22,22 +26,27 @@ def create_expectations(csv_data_source, expec_file_path):
     train.expect_column_values_to_not_be_null(id)
     train.expect_column_values_to_be_unique(id)
 
+    train.expect_column_distinct_values_to_be_in_set(type, {'Movie', 'TV Show'})
+
     train.expect_column_values_to_not_be_null(title)
     train.expect_table_row_count_to_be_between(0, 10000)
 
     train.expect_column_values_to_be_of_type(release_year, 'int')
     train.expect_column_values_to_be_between(release_year, 1900, 2022)
-
     #...
+
     train.save_expectation_suite(expec_file_path)
 
+# Validate data for a given streaming service
+# Args:
+    # string: csv_data_source (the relative file path for the CSV data source)
+    # string: expec_file_path (the relative file path to load the expectations suite)
+# Return: 
+    # JSON: result (the validation result)
 def validate_data(csv_data_source, expec_file_path):
     test = ge.read_csv(csv_data_source)
     result = test.validate(expectation_suite=expec_file_path)
-    print("Validating data..")
-    print("Displaying data validation result..")
     if result["success"]:
-        print(result.statistics)
-        return True
+        return result
     else:
         raise Exception("Data validation has failed..")

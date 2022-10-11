@@ -4,6 +4,7 @@ from spark_session import getSparkSession
 from schema import getSchema, id, type, title, director, cast, country, date_added, release_year, rating, duration, streaming_service
 from file_manipulation import readFromCSVFile, readFromParquetFile, writeToParquetFile
 from validation import create_expectations, validate_data
+from log import print_validation_result
 
 # Filters and Processing information
 types_movie = "Movie"
@@ -23,6 +24,11 @@ runtime = duration
 spark = getSparkSession()
   
 # Process data frame
+# Args:
+    # DataFrame: df (the input data frame based on the CSV file)
+    # string: streaming_service_name (the streaming service name)
+# Return 
+    # DataFrame: cleaned_films (the output data frame based on processing and cleaning)
 def processDataFrame(df, streaming_service_name):
     df = df.filter(col(type).contains(types_movie))                                                  # filter Movie type only
     df = df.withColumn(date_added, 
@@ -46,27 +52,42 @@ def processDataFrame(df, streaming_service_name):
     )                                                    
     return cleaned_films
 
+# Main function
+# Args: N/A
+# Return: None
 def main():
+
+    # For each streaming service
+        # create expectations and validate CSV file
+        # clean, extract and save required data aggregating from all streaming services
     for provider in getDataSources():
         print("Processing "+provider[1]+"..")
-        # Data validation using expectations
+        
+        # Create expectations
         films_expec_path = "expectations/"+provider[1]+"_expectations.json"
         create_expectations(provider[0], films_expec_path)
-        validate_data(provider[0], films_expec_path)
+        
+        # Run validations
+        print("Validating data..")
+        result = validate_data(provider[0], films_expec_path)
+        print("Displaying data validation result..")
+        print_validation_result(result)
 
-        # Clean and extract and save required data
+        # Clean and extract required data
         df = readFromCSVFile(provider[0], getSchema(), spark)
         print("Displaying "+provider[1]+" schema..")
         df.printSchema() 
-        print("Printing "+provider[1]+" raw data..")
+        print("Displaying "+provider[1]+" raw data..")
         df.show()
         cleaned_data = processDataFrame(df, provider[1])
+
+        # Save to Parquet file
         writeToParquetFile(cleaned_data, getParquetFile())
         print("Displaying "+provider[1]+" cleaned data..")
         cleaned_data.show()
     
     # Display the output data   
-    print("Displaying agregated data across "+str([x[1] for x in getDataSources()]))   
+    print("Displaying agregated data from sources.. "+str([x[1] for x in getDataSources()]))   
     readFromParquetFile(getParquetFile(), spark).sort(title).show()                                     # log: cross validation of Parquet data                                                                      
 
 main()
