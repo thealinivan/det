@@ -13,6 +13,10 @@ rating = "rating"
 duration = "duration"
 streaming_service = "streaming_service"
 
+# Define and return data frame structure
+# Args: N/A
+# Return:
+    # StructType: (data frame structure)
 def getSchema():
     return StructType([\
         StructField(id, StringType(), True),\
